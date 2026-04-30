@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-8">Gestion des Entités Académiques</h1>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- MATIERES -->
+        <div class="bg-white p-6 rounded shadow">
+            <h2 class="text-xl font-semibold mb-4 border-b pb-2">Matières</h2>
+            
+            <form method="POST" class="mb-6 bg-gray-50 p-4 rounded border">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="add_matiere">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium">Nom</label>
+                        <select name="nom" class="w-full border rounded p-2">
+                            {% for m_val, m_label in matiere_choices %}
+                                <option value="{{ m_val }}">{{ m_label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium">Code (Unique)</label>
+                        <input type="text" name="code" class="w-full border rounded p-2" required>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <label class="block text-sm font-medium">Description</label>
+                    <textarea name="description" class="w-full border rounded p-2" rows="2"></textarea>
+                </div>
+                <button type="submit" class="mt-4 bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 w-full">Ajouter Matière</button>
+            </form>
+
+            <ul class="space-y-2">
+                {% for matiere in matieres %}
+                <li class="flex justify-between items-center p-3 border-b hover:bg-gray-50">
+                    <div>
+                        <span class="font-bold">{{ matiere.nom }}</span>
+                        <span class="text-xs text-gray-500 ml-2">[{{ matiere.code }}]</span>
+                    </div>
+                    <span class="text-xs bg-gray-200 px-2 py-1 rounded">{{ matiere.created_at|date:"d/m/y" }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- CLASSES -->
+        <div class="bg-white p-6 rounded shadow">
+            <h2 class="text-xl font-semibold mb-4 border-b pb-2">Classes</h2>
+            
+            <form method="POST" class="mb-6 bg-gray-50 p-4 rounded border">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="add_classe">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium">Nom de la classe</label>
+                        <input type="text" name="nom" placeholder="Ex: Terminale C1" class="w-full border rounded p-2" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium">Niveau</label>
+                        <select name="niveau" class="w-full border rounded p-2">
+                            {% for c_val, c_label in classe_choices %}
+                                <option value="{{ c_val }}">{{ c_label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <label class="block text-sm font-medium">Année Académique</label>
+                    <input type="text" name="annee" value="2025-2026" class="w-full border rounded p-2">
+                </div>
+                <button type="submit" class="mt-4 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 w-full">Ajouter Classe</button>
+            </form>
+
+            <ul class="space-y-2">
+                {% for classe in classes %}
+                <li class="flex justify-between items-center p-3 border-b hover:bg-gray-50">
+                    <div>
+                        <span class="font-bold">{{ classe.nom }}</span>
+                        <span class="text-xs text-blue-600 ml-2">{{ classe.get_niveau_display }}</span>
+                    </div>
+                    <span class="text-sm text-gray-500">{{ classe.annee_academique }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

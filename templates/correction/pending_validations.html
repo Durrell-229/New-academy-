@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h1 class="text-3xl font-bold">Validations en attente</h1>
+            <p class="text-gray-500">{{ total }} copies corrigées par l'IA attendent votre approbation.</p>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-gray-50 border-b">
+                    <th class="p-4 font-bold text-gray-700">Élève</th>
+                    <th class="p-4 font-bold text-gray-700">Épreuve</th>
+                    <th class="p-4 font-bold text-gray-700">Note IA</th>
+                    <th class="p-4 font-bold text-gray-700">Soumis le</th>
+                    <th class="p-4 font-bold text-gray-700">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sub in submissions %}
+                <tr class="border-b hover:bg-gray-50 transition">
+                    <td class="p-4">
+                        <div class="font-bold">{{ sub.student.full_name }}</div>
+                        <div class="text-xs text-gray-500">{{ sub.student.email }}</div>
+                    </td>
+                    <td class="p-4">
+                        <div class="font-medium">{{ sub.exam.titre }}</div>
+                        <div class="text-xs text-indigo-600">{{ sub.exam.matiere }}</div>
+                    </td>
+                    <td class="p-4">
+                        <span class="text-lg font-bold text-indigo-600">{{ sub.note_ia }}/20</span>
+                    </td>
+                    <td class="p-4 text-sm text-gray-600">
+                        {{ sub.created_at|date:"d/m/Y H:i" }}
+                    </td>
+                    <td class="p-4">
+                        <div class="flex gap-2">
+                            <a href="{% url 'approve_submission' sub.id %}" class="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700">
+                                Approuver
+                            </a>
+                            <a href="#" class="border border-gray-300 px-3 py-1 rounded text-sm hover:bg-gray-50">
+                                Voir Copie
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="p-12 text-center text-gray-500">
+                        <div class="text-4xl mb-4">🎉</div>
+                        <p class="text-lg font-medium">Toutes les copies ont été validées !</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
