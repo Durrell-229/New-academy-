@@ -2,15 +2,14 @@
 Vues complètes pour la gestion des bulletins PDF
 Dashboard élève/prof/admin pour visualisation et téléchargement
 """
+# pylint: disable=no-member  # Django models have .objects manager
 import logging
 import os
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse, JsonResponse, FileResponse, Http404, HttpResponseForbidden
+from django.http import HttpResponse, JsonResponse, Http404, HttpResponseForbidden
 from django.core.files.base import ContentFile
 from django.utils import timezone
-from datetime import datetime
-from django.db.models import Avg, Q
 from decimal import Decimal
 
 from .models import Bulletin, BulletinLigne
@@ -92,13 +91,13 @@ def download(request, bulletin_id):
             bulletin.file_pdf.save(filename, ContentFile(pdf_content), save=True)
             bulletin.is_signed = True
             
-            signature = BulletinService._generate_digital_signature(bulletin)
+            signature = BulletinService.generate_digital_signature(bulletin)
             bulletin.signature_numerique = signature
             bulletin.save(update_fields=['file_pdf', 'is_signed', 'signature_numerique'])
             
-        except Exception as e:
-            logger.error(f"[PDFDownload] Erreur génération: {e}")
-            raise Http404("Erreur génération PDF")
+        except (ValueError, OSError) as e:
+            logger.error("[PDFDownload] Erreur génération: %s", str(e))
+            raise Http404("Erreur génération PDF") from e
     
     # Retourner fichier
     if bulletin.file_pdf:
@@ -142,7 +141,7 @@ def generate_on_demand(request, result_id):
             }
         )
         
-        from bulletins.models import BulletinLigne
+        # BulletinLigne already imported at top
         BulletinLigne.objects.filter(bulletin=bulletin).delete()
         
         BulletinLigne.objects.create(
@@ -154,7 +153,7 @@ def generate_on_demand(request, result_id):
             appreciation=resultat.appreciation or '-'
         )
         
-        pdf_content, context = BulletinService.generate_bulletin_professionnel(resultat)
+        pdf_content, _ = BulletinService.generate_bulletin_professionnel(resultat)
         
         filename = f"bulletin_{eleve.last_name}_on_demand_{timezone.now().strftime('%Y%m%d_%H%M%S')}.pdf"
         bulletin.file_pdf.save(filename, ContentFile(pdf_content), save=True)
@@ -166,8 +165,8 @@ def generate_on_demand(request, result_id):
             'download_url': f'/bulletins/download/{bulletin.id}/'
         })
         
-    except Exception as e:
-        logger.error(f"[GenerateOnDemand] Erreur: {e}", exc_info=True)
+    except (ValueError, OSError, IOError) as e:
+        logger.error("[GenerateOnDemand] Erreur: %s", str(e), exc_info=True)
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
 
@@ -215,7 +214,7 @@ def stats(request):
 
 
 @login_required
-def bulk_download(request):
+def bulk_download(_request):
     """Placeholder téléchargement groupé ZIP"""
     return JsonResponse({
         'status': 'coming_soon',

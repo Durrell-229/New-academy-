@@ -1,6 +1,7 @@
 """
 Service pour la génération et gestion des bulletins PDF.
 """
+# pylint: disable=unused-argument  # Certains paramètres sont pour compatibilité
 import logging
 import hashlib
 from datetime import datetime
@@ -59,8 +60,8 @@ class BulletinService:
             buffer.close()
 
             return pdf_content
-        except Exception as e:
-            logger.error(f"Erreur génération bulletin PDF: {str(e)}")
+        except (IOError, ValueError) as e:
+            logger.error("Erreur génération bulletin PDF: %s", str(e))
             return b""
 
     @staticmethod
@@ -73,18 +74,18 @@ class BulletinService:
                 'instance': instance,
             }
             return pdf_content, context
-        except Exception as e:
-            logger.error(f"Erreur génération bulletin professionnel: {str(e)}")
+        except (IOError, ValueError) as e:
+            logger.error("Erreur génération bulletin professionnel: %s", str(e))
             return b"", {}
 
     @staticmethod
-    def _generate_digital_signature(bulletin):
+    def generate_digital_signature(bulletin):
         """Génère une signature numérique pour le bulletin"""
         try:
             # Créer une signature basée sur l'ID et la date
             data = f"{bulletin.id}_{datetime.now().isoformat()}".encode()
             signature = hashlib.sha256(data).hexdigest()
             return signature
-        except Exception as e:
-            logger.error(f"Erreur génération signature: {str(e)}")
+        except (ValueError, AttributeError) as e:
+            logger.error("Erreur génération signature: %s", str(e))
             return ""
