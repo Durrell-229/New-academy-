@@ -171,7 +171,7 @@ def submit_session(request: HttpRequest, session_id: str):
 @router.post("/cheat-event/{session_id}", response={200: MessageOut, 400: ErrorOut})
 def log_cheat_event(request: HttpRequest, session_id: str, payload: CheatEventSchema):
     session = get_object_or_404(CompositionSession, id=session_id, eleve=request.user)
-    log = AntiCheatLog.objects.create(
+    AntiCheatLog.objects.create(
         session=session,
         type_event=payload.type_event,
         description=payload.description or '',

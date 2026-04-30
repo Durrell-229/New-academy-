@@ -3,7 +3,6 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
-from django.views.generic import RedirectView
 
 from core.views import home_view, admin_dashboard_view
 from accounts.views import dashboard_view as accounts_dashboard
