@@ -4,11 +4,10 @@ from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 
 class MeetingRoom(models.Model):
-    STATUS_CHOICES = [
-        ('scheduled', _('Planifiée')),
-        ('live', _('En direct')),
-        ('ended', _('Terminée')),
-    ]
+    class Status(models.TextChoices):
+        SCHEDULED = 'scheduled', _('Planifiée')
+        LIVE = 'live', _('En direct')
+        ENDED = 'ended', _('Terminée')
 
     id = models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True)
     name = models.CharField(_('Nom de la salle'), max_length=255)
@@ -21,7 +20,7 @@ class MeetingRoom(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     started_at = models.DateTimeField(_('Débutée le'), blank=True, null=True)
     ended_at = models.DateTimeField(_('Terminée le'), blank=True, null=True)
-    status = models.CharField(_('Statut'), max_length=20, choices=STATUS_CHOICES, default='scheduled')
+    status = models.CharField(_('Statut'), max_length=20, choices=Status.choices, default=Status.SCHEDULED)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, 
         on_delete=models.CASCADE, 
@@ -42,27 +41,25 @@ class MeetingRoom(models.Model):
 
 
 class RoomParticipant(models.Model):
-    ROLE_CHOICES = [
-        ('host', _('Hôte')),
-        ('moderator', _('Modérateur')),
-        ('participant', _('Participant')),
-    ]
+    class Role(models.TextChoices):
+        HOST = 'host', _('Hôte')
+        MODERATOR = 'moderator', _('Modérateur')
+        PARTICIPANT = 'participant', _('Participant')
 
-    PARTICIPANT_STATUS = [
-        ('waiting', _("Salle d'attente")),
-        ('in_room', _('Dans la salle')),
-        ('left', _('A quitté')),
-    ]
+    class Status(models.TextChoices):
+        WAITING = 'waiting', _("Salle d'attente")
+        IN_ROOM = 'in_room', _('Dans la salle')
+        LEFT = 'left', _('A quitté')
 
     id = models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True)
     room = models.ForeignKey(MeetingRoom, on_delete=models.CASCADE, related_name='participants', verbose_name=_('Salle'))
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='room_participations', verbose_name=_('Utilisateur'))
-    role = models.CharField(_('Rôle'), max_length=20, choices=ROLE_CHOICES, default='participant')
+    role = models.CharField(_('Rôle'), max_length=20, choices=Role.choices, default=Role.PARTICIPANT)
     joined_at = models.DateTimeField(auto_now_add=True)
     left_at = models.DateTimeField(_('A quitté le'), blank=True, null=True)
     is_muted = models.BooleanField(_('Muet'), default=False)
     is_camera_on = models.BooleanField(_('Caméra active'), default=True)
-    status = models.CharField(_('Statut'), max_length=20, choices=PARTICIPANT_STATUS, default='in_room')
+    status = models.CharField(_('Statut'), max_length=20, choices=Status.choices, default=Status.IN_ROOM)
 
     class Meta:
         verbose_name = _('Participant')

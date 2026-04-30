@@ -1,5 +1,5 @@
 from ninja import Router, Schema
-from api.services.ai_service import AIService
+from ai_engine.services import AIService
 import uuid
 
 router = Router()
