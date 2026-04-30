@@ -1,3 +1,10 @@
+"""
+Compositions API endpoints for Django Ninja.
+
+This module contains all API routes for composition management, session handling,
+and submission processing.
+"""
+# pylint: disable=no-member  # Django models have .objects manager
 from typing import List, Optional
 from django.http import HttpRequest
 from ninja import Router, Schema, File
